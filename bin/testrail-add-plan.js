@@ -7,17 +7,14 @@ const debug = require('debug')('cypress-testrail-simple')
 const got = require('got')
 const globby = require('globby')
 const { getTestRailConfig, getAuthorization } = require('../src/get-config')
-const { findCases } = require('../src/find-cases')
 const { getTestSuite } = require('../src/testrail-api')
 
 const args = arg(
   {
-    '--spec': String,
     '--name': String,
-    '--suite': String,
     '--nameRun': String,
+    '--suite': String,
     // aliases
-    '-s': '--spec',
     '-n': '--name',
     '-st': '--suite',
     '-nr': '--nameRun',
@@ -31,23 +28,13 @@ debug('args: %o', args)
 debug('plan name: %s', name)
 debug('run name: %s', nameRun)
 
-function findSpecs(pattern) {
-  // @ts-ignore
-  return globby(pattern, {
-    absolute: true,
-  })
-}
-
 async function addTestPlan({
-  testRailInfo, name, nameRun, caseIds,
+  testRailInfo, name, nameRun
 }) {
   console.error(
-    'creating new TestRail run for project %s',
+    'creating new TestRail plan for project %s',
     testRailInfo.projectId,
   )
-  if (caseIds && caseIds.length > 0) {
-    console.error('With %d case IDs', caseIds.length)
-  }
 
   const addTestPlanUrl = `${testRailInfo.host}index.php?/api/v2/add_plan/${testRailInfo.project_id}`
   debug('add test plan url: %s', addTestPlanUrl)
@@ -62,14 +49,10 @@ async function addTestPlan({
       },
     ],
   }
-  if (caseIds && caseIds.length > 0) {
-    json.entries[0].include_all = false
-    json.entries[0].case_ids = caseIds
-  }
 
   debug('add plan params %o', json)
 
-  let suiteId = args['--suite'] || testRailInfo.suiteId
+  let suiteId = testRailInfo.suiteId
   if (suiteId) {
     // let the user pass the suite ID like the TestRail shows it "S..."
     // or just the number
@@ -108,22 +91,7 @@ async function addTestPlan({
       },
     )
 }
-
-if (args['--spec']) {
-  findSpecs(args['--spec']).then((specs) => {
-    debug('using pattern "%s" found specs', args['--spec'])
-    debug(specs)
-    const caseIds = findCases(specs)
-    debug('found TestRail case ids: %o', caseIds)
-
-    const testRailInfo = getTestRailConfig()
-    addTestPlan({
-      testRailInfo, name, nameRun, caseIds,
-    })
-  })
-} else {
-  const testRailInfo = getTestRailConfig()
+const testRailInfo = getTestRailConfig()
   // start a new test run for all test cases
   // @ts-ignore
-  addTestPlan({ testRailInfo, name, nameRun })
-}
+addTestPlan({ testRailInfo, name, nameRun })
