@@ -14,22 +14,22 @@ const args = arg(
   {
     '--spec': String,
     '--name': String,
-    '--description': String,
     '--suite': String,
+    '--nameRun': String,
     // aliases
     '-s': '--spec',
     '-n': '--name',
-    '-d': '--description',
     '-st': '--suite',
+    '-nr': '--nameRun',
   },
   { permissive: true },
 )
 // optional arguments
 const name = args['--name'] || args._[0]
-const description = args['--description'] || args._[1]
+const nameRun = args['--nameRun'] || args._[1]
 debug('args: %o', args)
-debug('run name: %s', name)
-debug('run description: %s', description)
+debug('plan name: %s', name)
+debug('run name: %s', nameRun)
 
 function findSpecs(pattern) {
   // @ts-ignore
@@ -38,8 +38,9 @@ function findSpecs(pattern) {
   })
 }
 
-async function startRun({ testRailInfo, name, description, caseIds }) {
-  // only output the run ID to the STDOUT, everything else is logged to the STDERR
+async function addTestPlan({
+  testRailInfo, name, nameRun, caseIds,
+}) {
   console.error(
     'creating new TestRail run for project %s',
     testRailInfo.projectId,
@@ -48,24 +49,25 @@ async function startRun({ testRailInfo, name, description, caseIds }) {
     console.error('With %d case IDs', caseIds.length)
   }
 
-  const addRunUrl = `${testRailInfo.host}/index.php?/api/v2/add_run/${testRailInfo.projectId}`
-  debug('add run url: %s', addRunUrl)
+  const addTestPlanUrl = `${testRailInfo.host}index.php?/api/v2/add_plan/${testRailInfo.project_id}`
+  debug('add test plan url: %s', addTestPlanUrl)
   const authorization = getAuthorization(testRailInfo)
 
   const json = {
     name,
-    description,
+    entries: [
+      {
+        suite_id: testRailInfo.suiteId,
+        name: nameRun,
+      },
+    ],
   }
   if (caseIds && caseIds.length > 0) {
-    const uniqueCaseIds = [...new Set(caseIds)]
-    if (uniqueCaseIds.length !== caseIds.length) {
-      debug('Removed duplicate case IDs')
-      debug('have %d case IDs', uniqueCaseIds.length)
-    }
-    json.include_all = false
-    json.case_ids = uniqueCaseIds
+    json.entries[0].include_all = false
+    json.entries[0].case_ids = caseIds
   }
-  debug('add run params %o', json)
+
+  debug('add plan params %o', json)
 
   let suiteId = args['--suite'] || testRailInfo.suiteId
   if (suiteId) {
@@ -79,9 +81,8 @@ async function startRun({ testRailInfo, name, description, caseIds }) {
     // simply print all test cases
     await getTestSuite(suiteId, testRailInfo)
   }
-
   // @ts-ignore
-  return got(addRunUrl, {
+  return got(addTestPlanUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -116,11 +117,13 @@ if (args['--spec']) {
     debug('found TestRail case ids: %o', caseIds)
 
     const testRailInfo = getTestRailConfig()
-    startRun({ testRailInfo, name, description, caseIds })
+    addTestPlan({
+      testRailInfo, name, nameRun, caseIds,
+    })
   })
 } else {
   const testRailInfo = getTestRailConfig()
   // start a new test run for all test cases
   // @ts-ignore
-  startRun({ testRailInfo, name, description })
+  addTestPlan({ testRailInfo, name, nameRun })
 }
