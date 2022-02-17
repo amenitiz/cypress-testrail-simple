@@ -29,7 +29,7 @@ async function addTestPlan({
     testRailInfo.projectId,
   )
 
-  const addTestPlanUrl = `${testRailInfo.host}index.php?/api/v2/add_plan/${testRailInfo.projectId}`
+  const addTestPlanUrl = `${testRailInfo.host}/index.php?/api/v2/add_plan/${testRailInfo.projectId}`
   debug('add test plan url: %s', addTestPlanUrl)
   const authorization = getAuthorization(testRailInfo)
 
