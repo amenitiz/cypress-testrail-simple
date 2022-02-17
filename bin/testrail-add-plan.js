@@ -34,7 +34,7 @@ async function addTestPlan({
   const authorization = getAuthorization(testRailInfo)
 
   const json = {
-    planName,
+    name: planName,
   }
   debug('add plan params %o', json)
   // @ts-ignore
