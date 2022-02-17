@@ -11,7 +11,7 @@
     "testrail-close-run": "bin/testrail-close-run.js",
     "testrail-start-run": "bin/testrail-start-run.js",
     "testrail-add-plan": "bin/testrail-add-plan.js",
-    "testrail-add-run-to-plan": "bin/testrail-add-run-to-plan"
+    "testrail-add-run-to-plan": "bin/testrail-add-run-to-plan.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
