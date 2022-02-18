@@ -32,12 +32,10 @@ async function addRunToPlan({ testRailInfo, planId, runId }) {
     const authorization = getAuthorization(testRailInfo)
 
     const json = {
-        config_ids: [],
+        config_ids: [1, testRailInfo.suiteId],
     }
     debug('add run to plan params %o', json)
-
-    let suiteId = testRailInfo.suiteId
-
+    
     // @ts-ignore
     return got(addRunToPlanUrl, {
         method: 'POST',
