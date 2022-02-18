@@ -27,17 +27,19 @@ debug('run description: %s', runId)
 async function addRunToPlan({ testRailInfo, planId, runId }) {
     // only output the run ID to the STDOUT, everything else is logged to the STDERR
 
-    const addRunToPlanUrl = `${testRailInfo.host}/index.php?/api/v2/add_run_to_plan_entry/${planId}/${runId}`
-    debug('add run to plan url: %s', addRunToPlanUrl)
+    const addPlanEntryUrl = `${testRailInfo.host}/index.php?/api/v2/add_plan_entry/${planId}`
+    //const addRunToPlanUrl = `${testRailInfo.host}/index.php?/api/v2/add_run_to_plan_entry/${planId}/${runId}`
+    //debug('add run to plan url: %s', addRunToPlanUrl)
     const authorization = getAuthorization(testRailInfo)
 
     const json = {
-        config_ids: [1, testRailInfo.suiteId],
+        //config_ids: [1, testRailInfo.suiteId],
+        suite_id: testRailInfo.suite_id
     }
     debug('add run to plan params %o', json)
-    
+
     // @ts-ignore
-    return got(addRunToPlanUrl, {
+    return got(addPlanEntryUrl, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -54,6 +56,7 @@ async function addRunToPlan({ testRailInfo, planId, runId }) {
             (error) => {
                 console.error('Could not add TestRail run to Test Plan')
                 console.error('Response: %s', error.name)
+                console.error('Response: %s', error.error)
                 console.error('Please check your TestRail configuration')
                 process.exit(1)
             },
