@@ -34,7 +34,7 @@ async function addRunToPlan({ testRailInfo, planId, runId }) {
 
     const json = {
         //config_ids: [1, testRailInfo.suiteId],
-        suite_id: testRailInfo.suite_id
+        suite_id: testRailInfo.suiteId
     }
     debug('add run to plan params %o', json)
 
