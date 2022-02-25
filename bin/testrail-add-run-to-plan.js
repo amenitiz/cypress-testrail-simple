@@ -10,17 +10,23 @@ const { getTestRailConfig, getAuthorization } = require('../src/get-config')
 const args = arg(
     {
         '--planId': String,
+        '--description': String,
         // aliases
         '-p': '--planId',
+        '-d': '--description'
     },
     { permissive: true },
 )
 // optional arguments
 const planId = args['--planId'] || args._[0]
-debug('args: %o', args)
-debug('run name: %s', planId)
+const description = args['--description'] || args._[1]
 
-async function addRunToPlan({ testRailInfo, planId }) {
+debug('args: %o', args)
+debug('plan id: %s', planId)
+debug('description: %s', description)
+
+
+async function addRunToPlan({ testRailInfo, planId, description }) {
     // only output the run ID to the STDOUT, everything else is logged to the STDERR
 
     const addPlanEntryUrl = `${testRailInfo.host}/index.php?/api/v2/add_plan_entry/${planId}`
@@ -28,7 +34,8 @@ async function addRunToPlan({ testRailInfo, planId }) {
     const authorization = getAuthorization(testRailInfo)
 
     const json = {
-        suite_id: testRailInfo.suiteId
+        suite_id: testRailInfo.suiteId,
+        description: description
     }
     debug('add run to plan params %o', json)
 
@@ -61,5 +68,5 @@ async function addRunToPlan({ testRailInfo, planId }) {
 const testRailInfo = getTestRailConfig()
 // start a new test run for all test cases
 // @ts-ignore
-addRunToPlan({ testRailInfo, planId })
+addRunToPlan({ testRailInfo, planId, description })
 
