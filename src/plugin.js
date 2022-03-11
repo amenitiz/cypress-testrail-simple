@@ -21,6 +21,7 @@ async function sendTestResults(testRailInfo, runId, testResults) {
 
   // @ts-ignore
   const json = await got(addResultsUrl, {
+    limit: 5,
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
